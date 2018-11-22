@@ -45,11 +45,17 @@ def dump_one_hunk(hunk):
 def dump_one_patch(patch):
     src_file = patch.source_file
     tar_file = patch.target_file
-    hunk_infos = []
+    delete_linenos = []
+    add_linenos = []
     for hunk in patch:
         hunk_info = dump_one_hunk(hunk)
-        hunk_infos.append(hunk_info)
-    return Diff(src_file, tar_file, hunk_infos)
+        delete_linenos.extend(hunk_info["d"])
+        add_linenos.extend(hunk_info["a"])
+    modify_info = {
+        "d": delete_linenos,
+        "a": add_linenos
+    }
+    return Diff(src_file, tar_file, modify_info)
 
 
 def parse_diff(diff):

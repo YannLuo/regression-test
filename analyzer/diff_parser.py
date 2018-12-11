@@ -8,10 +8,10 @@ class Diff(object):
         self.hunk_infos = hunk_infos
 
     def __str__(self):
-        return f"{{Diff\n\tsrc_file: {self.src_file}\n\ttar_file: {self.tar_file}\n\thunk_infos: {self.hunk_infos}\n}}"
+        return f"Diff <src_file: {self.src_file}  tar_file: {self.tar_file}  hunk_infos: {self.hunk_infos}>"
 
     def __repr__(self):
-        return f"{{Diff\n\tsrc_file: {self.src_file}\n\ttar_file: {self.tar_file}\n\thunk_infos: {self.hunk_infos}\n}}"
+        return f"Diff <src_file: {self.src_file}  tar_file: {self.tar_file}  hunk_infos: {self.hunk_infos}>"
 
 
 def dump_one_hunk(hunk):

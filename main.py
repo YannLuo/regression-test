@@ -72,7 +72,7 @@ def main():
         q = []
         s = set()
         for cur_call in rev_callgraph:
-            if cur_call.startswith(prefix_namespace):
+            if cur_call.startswith(prefix_namespace) and cur_call.endswith(name):
                 for si in rev_callgraph[cur_call]:
                     if si not in s:
                         q.append(si)

@@ -42,7 +42,7 @@ def main():
                 for i in range(len(functiondef_list)-1):
                     if functiondef_list[i].start_lineno <= add_lineno < functiondef_list[i+1].start_lineno:
                         mod_functiondef_list.add((tar_module, functiondef_list[i].name))
-        repo.git.checkout('master')
+        repo.git.checkout(['-f', 'master'])
 
         repo.git.checkout(pre_commit_sha)
         src_file_path = diff.src_file[2:]
@@ -53,7 +53,7 @@ def main():
                 for i in range(len(functiondef_list) - 1):
                     if functiondef_list[i].start_lineno <= del_lineno < functiondef_list[i + 1].start_lineno:
                         mod_functiondef_list.add((src_module, functiondef_list[i].name))
-        repo.git.checkout('master')
+        repo.git.checkout(['-f', 'master'])
 
     # ========== calculate reverse callgraph ==========
 

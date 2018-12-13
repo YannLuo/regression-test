@@ -33,7 +33,10 @@ def main():
 
     for diff in diff_infos:
 
-        repo.git.checkout(commit_sha)
+        try:
+            repo.git.checkout(['-f', commit_sha])
+        except:
+            pass
         tar_file_path = diff.tar_file[2:]
         if tar_file_path.endswith('.py'):
             tar_module = '.'.join(tar_file_path[:-3].split('/'))
@@ -42,9 +45,15 @@ def main():
                 for i in range(len(functiondef_list)-1):
                     if functiondef_list[i].start_lineno <= add_lineno < functiondef_list[i+1].start_lineno:
                         mod_functiondef_list.add((tar_module, functiondef_list[i].name))
-        repo.git.checkout(['-f', 'master'])
+        try:
+            repo.git.checkout(['-f', 'master'])
+        except:
+            pass
 
-        repo.git.checkout(pre_commit_sha)
+        try:
+            repo.git.checkout(['-f', pre_commit_sha])
+        except:
+            pass
         src_file_path = diff.src_file[2:]
         if src_file_path.endswith('.py'):
             src_module = '.'.join(src_file_path[:-3].split('/'))
@@ -53,7 +62,10 @@ def main():
                 for i in range(len(functiondef_list) - 1):
                     if functiondef_list[i].start_lineno <= del_lineno < functiondef_list[i + 1].start_lineno:
                         mod_functiondef_list.add((src_module, functiondef_list[i].name))
-        repo.git.checkout(['-f', 'master'])
+        try:
+            repo.git.checkout(['-f', 'master'])
+        except:
+            pass
 
     # ========== calculate reverse callgraph ==========
 
@@ -63,32 +75,34 @@ def main():
     rev_callgraph = defaultdict(set)
     for caller, callee_list in callgraph.items():
         for callee in callee_list:
-            rev_callgraph["%s %s" % (callee["namespace"], callee["name"])].add(caller)
+            rev_callgraph["%s %s %s" % (callee["namespace"], callee["name"], callee["flavor"])].add(caller)
 
     # ========== analyze change impact ==========
 
-    selected_tests_module = set()
+    s = set()
     for prefix_namespace, name in mod_functiondef_list:
         q = []
-        s = set()
         for cur_call in rev_callgraph:
-            if cur_call.startswith(prefix_namespace) and cur_call.endswith(name):
-                for si in rev_callgraph[cur_call]:
-                    if si not in s:
-                        q.append(si)
-                        s.add(si)
-        while len(q):
-            top = q[0]
-            q = q[1:]
-            if top in rev_callgraph:
-                for si in rev_callgraph[top]:
-                    if si not in s:
-                        q.append(si)
-                        s.add(si)
+            if cur_call.startswith(prefix_namespace) and cur_call.split(' ')[1] == name and cur_call not in s:
+                if cur_call not in s:
+                    q.append(cur_call)
+                    s.add(cur_call)
+    while len(q):
+        top = q[0]
+        q = q[1:]
+        if top in rev_callgraph:
+            for si in rev_callgraph[top]:
+                if si not in s:
+                    q.append(si)
+                    s.add(si)
 
-        for si in s:
-            if ".tests." in si:
-                selected_tests_module.add(si.split(' ')[0])
+    selected_tests_module = set()
+    for si in s:
+        if ".tests." in si:
+            namespace, name, flavor = si.split(" ")
+            if flavor != "Flavor.FUNCTION" and namespace.rfind(".") != -1:
+                namespace = namespace[:namespace.rfind(".")]
+            selected_tests_module.add(namespace)
 
     for item in selected_tests_module:
         print(item)

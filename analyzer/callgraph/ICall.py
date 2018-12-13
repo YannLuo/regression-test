@@ -7,7 +7,7 @@ class ICall(object):
         self.outdeg = 0
 
     def __str__(self):
-        return f'{self.namespace} {self.name}'
+        return f'{self.namespace} {self.name} {self.flavor}'
 
     def __repr__(self):
         return f'{self.namespace} {self.name} {self.flavor}'
@@ -16,4 +16,4 @@ class ICall(object):
         return self.indeg < other.indeg
 
     def __eq__(self, other):
-        return self.namespace == other.namespace and self.name == other.name
+        return self.namespace == other.namespace and self.name == other.name and self.flavor == other.flavor

@@ -24,12 +24,13 @@ def main():
 
     repo_path = os.path.join('REPOS', 'numpy')
     repo = git.Repo(repo_path)
-    commit_sha = "7a3c50a"
+    commit_sha = "7caac2e"
     pre_commit_sha = f"{commit_sha}~1"
     diff_content = repo.git.diff(pre_commit_sha, commit_sha)
     diff_infos = parse_diff(diff_content)
 
     mod_functiondef_list = set()
+    mod_file_list = set()
 
     for diff in diff_infos:
         try:
@@ -39,6 +40,7 @@ def main():
         tar_file_path = diff.tar_file[2:]
         if tar_file_path.endswith('.py'):
             tar_module = '.'.join(tar_file_path[:-3].split('/'))
+            mod_file_list.add(tar_module)
             functiondef_list = collect_functiondef(os.path.join(repo_path, tar_file_path))
             for add_lineno in diff.hunk_infos["a"]:
                 for i in range(len(functiondef_list)-1):
@@ -134,7 +136,14 @@ def main():
                     s.add(cur_call)
 
     # q = ['numpy.ma.extras._median']
-    # print(q)
+
+    if not q:
+        for prefix_namespace in mod_file_list:
+            for cur_call in rev_callgraph:
+                if cur_call.startswith(prefix_namespace) and cur_call not in s:
+                    if cur_call not in s:
+                        q.append(cur_call)
+                        s.add(cur_call)
 
     while len(q):
         top = q[0]

@@ -3,6 +3,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import json
 from pyecharts import Graph
+import csv
 
 
 def draw1():
@@ -107,11 +108,21 @@ def draw2():
         })
     nodes = new_nodes
     edges = [{"source": item[0], "target":item[1]} for item in edges]
-    graph = Graph("调用图", width=1600, height=1200, title_pos="center")
-    graph.add("", nodes, edges,  graph_edge_symbol=[None, 'arrow'],
-              graph_gravity=0.10, graph_repulsion=50, graph_edge_length=50,
-              categories=['start', 'numpy', 'astropy', 'astropy_test'], is_legend_show=True)
-    graph.render()
+    # graph = Graph("调用图", width=1600, height=1200, title_pos="center")
+    # graph.add("", nodes, edges,  graph_edge_symbol=[None, 'arrow'],
+    #           graph_gravity=0.10, graph_repulsion=50, graph_edge_length=50,
+    #           categories=['start', 'numpy', 'astropy', 'astropy_test'], is_legend_show=True)
+    # graph.render()
+    with open('nodes.csv', mode='w', encoding='utf-8', newline='') as wf:
+        writer = csv.writer(wf)
+        writer.writerow(('Id', 'Label'))
+        for node in nodes:
+            writer.writerow((node["name"], node["category"]))
+    with open('edges.csv', mode='w', encoding='utf-8', newline='') as wf:
+        writer = csv.writer(wf)
+        writer.writerow(('source', 'target'))
+        for edge in edges:
+            writer.writerow((edge["source"], edge["target"]))
 
 
 callgraph = defaultdict(set)

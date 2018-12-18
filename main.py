@@ -76,20 +76,32 @@ def main():
         lines = rf.readlines()
     for line in lines:
         src, dst = line.strip().split()
-        if (src.startswith("numpy") or src.startswith("astropy")) and (dst.startswith("numpy") or dst.startswith("astropy")):
+        # if (src.startswith("numpy") or src.startswith("astropy")) and (dst.startswith("numpy") or dst.startswith("astropy")):
+        if (src.startswith("numpy") and dst.startswith("numpy")) or \
+                (src.startswith("astropy") and any([dst.startswith(x) for x in ("numpy", "astropy")])):
             callgraph[src].add(dst)
 
     test_files = set()
-    for call_site in callgraph:
-        if ".tests." in call_site and call_site.startswith('astropy'):
+    for caller, callees in callgraph.items():
+        if ".tests." in caller and caller.startswith('astropy'):
             spl_file = []
-            spl_cs = call_site.split('.')[:-1]
+            spl_cs = caller.split('.')[:-1]
             for ssi in spl_cs:
                 if ssi[0].isupper():
                     break
                 spl_file.append(ssi)
             file = '.'.join(spl_file)
             test_files.add(file)
+        for callee in callees:
+            if ".tests." in callee and callee.startswith('astropy'):
+                spl_file = []
+                spl_cs = callee.split('.')[:-1]
+                for ssi in spl_cs:
+                    if ssi[0].isupper():
+                        break
+                    spl_file.append(ssi)
+                file = '.'.join(spl_file)
+                test_files.add(file)
     print(len(test_files))
 
     rev_callgraph = defaultdict(set)
@@ -109,6 +121,9 @@ def main():
 
     # ========== analyze change impact ==========
 
+    with open('rev_callgraph.json', mode='r', encoding='utf-8') as rf:
+        rev_callgraph = json.load(rf)
+
     s = set()
     q = []
     for prefix_namespace, name in mod_functiondef_list:
@@ -118,15 +133,30 @@ def main():
                     q.append(cur_call)
                     s.add(cur_call)
 
+    # q = ['numpy.ma.extras._median']
+    # print(q)
+
     while len(q):
         top = q[0]
         # print(top)
+        spl_file = []
+        spl_si = top.split('.')[:-1]
+        for ssi in spl_si:
+            if ssi[0].isupper():
+                break
+            spl_file.append(ssi)
         q = q[1:]
         if top in rev_callgraph:
             for si in rev_callgraph[top]:
                 if si not in s:
                     q.append(si)
                     s.add(si)
+                    spl_file = []
+                    spl_si = si.split('.')[:-1]
+                    for ssi in spl_si:
+                        if ssi[0].isupper():
+                            break
+                        spl_file.append(ssi)
 
     selected_tests_module = set()
     for si in s:

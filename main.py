@@ -24,8 +24,8 @@ def main():
 
     repo_path = os.path.join('REPOS', 'numpy')
     repo = git.Repo(repo_path)
-    commit_sha = "7caac2e"
-    pre_commit_sha = f"{commit_sha}~1"
+    commit_sha = "36f481b"
+    pre_commit_sha = f"{commit_sha}~5"
     diff_content = repo.git.diff(pre_commit_sha, commit_sha)
     diff_infos = parse_diff(diff_content)
 

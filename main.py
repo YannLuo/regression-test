@@ -2,35 +2,21 @@ from analyzer.diff_parser import parse_diff
 from analyzer.ast_operator import collect_functiondef
 import git
 import os
-from logger import create_logger
-import time
-from analyzer.callgraph.callgraph import dump_callgraph
 import json
-from collections import defaultdict
+import numpy as np
 
 
 def main():
-    # ========== generate callgraph ==========
-
-    # logger = create_logger('log.log')
-    #
-    # repo_path = os.path.join('ecosystem', '**', '*.py')
-    # stt = time.clock()
-    # callgraph = dump_callgraph(repo_path, logger=logger)
-    # edt = time.clock()
-    # print("Generate callgraph cost %.2f minutes." % ((edt - stt) / 60.0, ))
-
     # ========== analyze git diff and dump modified function/method ==========
 
     repo_path = os.path.join('REPOS', 'numpy')
     repo = git.Repo(repo_path)
-    commit_sha = "a859ace"
+    commit_sha = "3cd9e73"
     pre_commit_sha = f"{commit_sha}~1"
     diff_content = repo.git.diff(pre_commit_sha, commit_sha)
     diff_infos = parse_diff(diff_content)
 
     mod_functiondef_list = set()
-    mod_file_list = set()
 
     for diff in diff_infos:
         try:
@@ -40,7 +26,6 @@ def main():
         tar_file_path = diff.tar_file[2:]
         if tar_file_path.endswith('.py'):
             tar_module = '.'.join(tar_file_path[:-3].split('/'))
-            mod_file_list.add(tar_module)
             functiondef_list = collect_functiondef(os.path.join(repo_path, tar_file_path))
             for add_lineno in diff.hunk_infos["a"]:
                 for i in range(len(functiondef_list)-1):
@@ -70,8 +55,8 @@ def main():
 
     # ========== calculate reverse callgraph ==========
 
-    # with open("callgraph.json", mode='r', encoding='utf-8') as rf:
-    #     callgraph = json.load(rf)
+    with open("callgraph.json", mode='r', encoding='utf-8') as rf:
+        callgraph = json.load(rf)
 
     # callgraph = defaultdict(set)
     # numpy_APIs = set()
@@ -106,27 +91,36 @@ def main():
     #                    indent=4)
     #     )
 
+    test_files = set()
+    for caller, callees in callgraph.items():
+        if ".tests." in caller and caller.startswith('astropy'):
+            spl_file = []
+            spl_cs = caller.split('.')[:-1]
+            for ssi in spl_cs:
+                if ssi[0].isupper():
+                    break
+                spl_file.append(ssi)
+            file = '.'.join(spl_file)
+            test_files.add(file)
+        for callee in callees:
+            if ".tests." in callee and callee.startswith('astropy'):
+                spl_file = []
+                spl_cs = callee.split('.')[:-1]
+                for ssi in spl_cs:
+                    if ssi[0].isupper():
+                        break
+                    spl_file.append(ssi)
+                file = '.'.join(spl_file)
+                test_files.add(file)
+    # print(len(test_files))
+
     # test_files = set()
     # for caller, callees in callgraph.items():
-    #     if ".tests." in caller and caller.startswith('astropy'):
-    #         spl_file = []
-    #         spl_cs = caller.split('.')[:-1]
-    #         for ssi in spl_cs:
-    #             if ssi[0].isupper():
-    #                 break
-    #             spl_file.append(ssi)
-    #         file = '.'.join(spl_file)
-    #         test_files.add(file)
+    #     if ".tests." in caller and caller.startswith('astropy') and caller.split('.')[-1].startswith("test_"):
+    #         test_files.add(caller)
     #     for callee in callees:
-    #         if ".tests." in callee and callee.startswith('astropy'):
-    #             spl_file = []
-    #             spl_cs = callee.split('.')[:-1]
-    #             for ssi in spl_cs:
-    #                 if ssi[0].isupper():
-    #                     break
-    #                 spl_file.append(ssi)
-    #             file = '.'.join(spl_file)
-    #             test_files.add(file)
+    #         if ".tests." in callee and callee.startswith('astropy') and callee.split('.')[-1].startswith("test_"):
+    #             test_files.add(callee)
     # print(len(test_files))
 
     # rev_callgraph = defaultdict(set)
@@ -150,6 +144,7 @@ def main():
         rev_callgraph = json.load(rf)
 
     s = set()
+    depth_dict = {}
     q = []
     for prefix_namespace, name in mod_functiondef_list:
         for cur_call in rev_callgraph:
@@ -158,33 +153,23 @@ def main():
                     q.append(cur_call)
                     s.add(cur_call)
 
-    if not q:
-        for prefix_namespace in mod_file_list:
-            for cur_call in rev_callgraph:
-                if cur_call.startswith(prefix_namespace) and cur_call not in s:
-                    if cur_call not in s:
-                        q.append(cur_call)
-                        s.add(cur_call)
+    q.append(-1)
 
-    with open("numpy_APIs.txt", mode='r', encoding='utf-8') as rf:
-        lines = rf.readlines()
-
-    # with open('gao.txt', mode='w', encoding='utf-8') as wf:
-    #     for api in tqdm(lines):
-    #         api = api.strip()
-    #         q = [api]
-    #         s = set()
-    #         s.add(api)
-    while len(q):
+    cnt = 0
+    while len(q) != 1:
         top = q[0]
-        # print(top)
+        q = q[1:]
+        if top == -1:
+            cnt += 1
+            q.append(-1)
+            continue
+        depth_dict[top] = cnt
         spl_file = []
         spl_si = top.split('.')[:-1]
         for ssi in spl_si:
             if ssi[0].isupper():
                 break
             spl_file.append(ssi)
-        q = q[1:]
         if top in rev_callgraph:
             for si in rev_callgraph[top]:
                 if si not in s:
@@ -197,6 +182,7 @@ def main():
                             break
                         spl_file.append(ssi)
 
+    min_depth_dict = {}
     selected_tests_module = set()
     for si in s:
         if ".tests." in si and si.startswith('astropy'):
@@ -208,10 +194,21 @@ def main():
                 spl_file.append(ssi)
             file = '.'.join(spl_file)
             selected_tests_module.add(file)
-            # wf.write("%s %d\n" % (api, len(selected_tests_module)))
+            min_depth_dict[file] = min(min_depth_dict.setdefault(file, 99999), depth_dict[si])
 
-    for item in selected_tests_module:
-        print(item)
+    selected_tests_module = list(sorted(selected_tests_module, key=lambda x: min_depth_dict[x]))
+
+    priority = np.array([min_depth_dict[x] for x in selected_tests_module])
+    priority = np.exp(-priority)
+
+    priority = priority / np.sum(priority)
+
+    rank = 1
+    for i in range(len(selected_tests_module)):
+        if i:
+            if priority[i] != priority[i-1]:
+                rank = i + 1
+        print("#%d" % (rank, ), selected_tests_module[i], "%.5f" % (priority[i], ))
 
 
 if __name__ == '__main__':

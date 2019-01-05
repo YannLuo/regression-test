@@ -3,15 +3,12 @@ from analyzer.ast_operator import collect_functiondef
 import git
 import os
 import json
-import numpy as np
 
 
-def main():
-    # ========== analyze git diff and dump modified function/method ==========
-
+def get_modified_functions():
     repo_path = os.path.join('REPOS', 'numpy')
     repo = git.Repo(repo_path)
-    commit_sha = "3cd9e73"
+    commit_sha = "a859ace"
     pre_commit_sha = f"{commit_sha}~1"
     diff_content = repo.git.diff(pre_commit_sha, commit_sha)
     diff_infos = parse_diff(diff_content)
@@ -28,8 +25,8 @@ def main():
             tar_module = '.'.join(tar_file_path[:-3].split('/'))
             functiondef_list = collect_functiondef(os.path.join(repo_path, tar_file_path))
             for add_lineno in diff.hunk_infos["a"]:
-                for i in range(len(functiondef_list)-1):
-                    if functiondef_list[i].start_lineno <= add_lineno < functiondef_list[i+1].start_lineno:
+                for i in range(len(functiondef_list) - 1):
+                    if functiondef_list[i].start_lineno <= add_lineno < functiondef_list[i + 1].start_lineno:
                         mod_functiondef_list.add((tar_module, functiondef_list[i].name))
         try:
             repo.git.checkout(['-f', 'master'])
@@ -53,10 +50,20 @@ def main():
         except:
             pass
 
+    return mod_functiondef_list
+
+
+def main():
+    # ========== analyze git diff and dump modified function/method ==========
+
+    mod_functiondef_list = get_modified_functions()
+
     # ========== calculate reverse callgraph ==========
 
-    with open("callgraph.json", mode='r', encoding='utf-8') as rf:
-        callgraph = json.load(rf)
+    # with open("callgraph.json", mode='r', encoding='utf-8') as rf:
+    #     callgraph = json.load(rf)
+
+    # identify numpy APIs
 
     # callgraph = defaultdict(set)
     # numpy_APIs = set()
@@ -73,6 +80,8 @@ def main():
     # with open('numpy_APIs.txt', mode='w', encoding='utf-8') as wf:
     #     for api in numpy_APIs:
     #         wf.write("%s\n" % (api, ))
+
+    # analyze callgraph
 
     # with open("numpy_callgraph.txt", mode="r", encoding="utf-8") as rf:
     #     lines = rf.readlines()
@@ -91,27 +100,29 @@ def main():
     #                    indent=4)
     #     )
 
-    test_files = set()
-    for caller, callees in callgraph.items():
-        if ".tests." in caller and caller.startswith('astropy'):
-            spl_file = []
-            spl_cs = caller.split('.')[:-1]
-            for ssi in spl_cs:
-                if ssi[0].isupper():
-                    break
-                spl_file.append(ssi)
-            file = '.'.join(spl_file)
-            test_files.add(file)
-        for callee in callees:
-            if ".tests." in callee and callee.startswith('astropy'):
-                spl_file = []
-                spl_cs = callee.split('.')[:-1]
-                for ssi in spl_cs:
-                    if ssi[0].isupper():
-                        break
-                    spl_file.append(ssi)
-                file = '.'.join(spl_file)
-                test_files.add(file)
+    # identify test files
+
+    # test_files = set()
+    # for caller, callees in callgraph.items():
+    #     if ".tests." in caller and caller.startswith('astropy'):
+    #         spl_file = []
+    #         spl_cs = caller.split('.')[:-1]
+    #         for ssi in spl_cs:
+    #             if ssi[0].isupper():
+    #                 break
+    #             spl_file.append(ssi)
+    #         file = '.'.join(spl_file)
+    #         test_files.add(file)
+    #     for callee in callees:
+    #         if ".tests." in callee and callee.startswith('astropy'):
+    #             spl_file = []
+    #             spl_cs = callee.split('.')[:-1]
+    #             for ssi in spl_cs:
+    #                 if ssi[0].isupper():
+    #                     break
+    #                 spl_file.append(ssi)
+    #             file = '.'.join(spl_file)
+    #             test_files.add(file)
     # print(len(test_files))
 
     # test_files = set()
@@ -122,6 +133,8 @@ def main():
     #         if ".tests." in callee and callee.startswith('astropy') and callee.split('.')[-1].startswith("test_"):
     #             test_files.add(callee)
     # print(len(test_files))
+
+    # analyze reversed callgraph
 
     # rev_callgraph = defaultdict(set)
     # for caller, callee_list in callgraph.items():
@@ -138,13 +151,12 @@ def main():
     #                    indent=4)
     #     )
 
-    # ========== analyze change impact ==========
+    # ========== analyze change impact (Regression Testing Selection) ==========
 
     with open('rev_callgraph.json', mode='r', encoding='utf-8') as rf:
         rev_callgraph = json.load(rf)
 
     s = set()
-    depth_dict = {}
     q = []
     for prefix_namespace, name in mod_functiondef_list:
         for cur_call in rev_callgraph:
@@ -153,36 +165,15 @@ def main():
                     q.append(cur_call)
                     s.add(cur_call)
 
-    q.append(-1)
-
-    cnt = 0
-    while len(q) != 1:
+    while len(q):
         top = q[0]
         q = q[1:]
-        if top == -1:
-            cnt += 1
-            q.append(-1)
-            continue
-        depth_dict[top] = cnt
-        spl_file = []
-        spl_si = top.split('.')[:-1]
-        for ssi in spl_si:
-            if ssi[0].isupper():
-                break
-            spl_file.append(ssi)
         if top in rev_callgraph:
             for si in rev_callgraph[top]:
                 if si not in s:
                     q.append(si)
                     s.add(si)
-                    spl_file = []
-                    spl_si = si.split('.')[:-1]
-                    for ssi in spl_si:
-                        if ssi[0].isupper():
-                            break
-                        spl_file.append(ssi)
 
-    min_depth_dict = {}
     selected_tests_module = set()
     for si in s:
         if ".tests." in si and si.startswith('astropy'):
@@ -194,21 +185,9 @@ def main():
                 spl_file.append(ssi)
             file = '.'.join(spl_file)
             selected_tests_module.add(file)
-            min_depth_dict[file] = min(min_depth_dict.setdefault(file, 99999), depth_dict[si])
 
-    selected_tests_module = list(sorted(selected_tests_module, key=lambda x: min_depth_dict[x]))
-
-    priority = np.array([min_depth_dict[x] for x in selected_tests_module])
-    priority = np.exp(-priority)
-
-    priority = priority / np.sum(priority)
-
-    rank = 1
-    for i in range(len(selected_tests_module)):
-        if i:
-            if priority[i] != priority[i-1]:
-                rank = i + 1
-        print("#%d" % (rank, ), selected_tests_module[i], "%.5f" % (priority[i], ))
+    for item in selected_tests_module:
+        print(item)
 
 
 if __name__ == '__main__':

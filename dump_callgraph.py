@@ -22,37 +22,63 @@ def read_call_trace(cg_file):
     return trace
 
 
-def archive_one_cg(repo, rev_callgraph):
-    with open(os.path.join("trace", "%s_rev_callgraph.json" % (repo, )), mode="w", encoding="utf-8") as wf:
-        wf.write(
-            json.dumps(rev_callgraph,
-                       default=lambda o: o.__dict__,
-                       indent=4)
-        )
-
-
-def dump_one_cg(repo):
+def dump_one_repo(repo):
     trace = read_call_trace(os.path.join(
         "trace", "%s_trace.txt" % (repo, )))
     downstream = repo + "."
     upstream = UPSTREAM_DICT[repo] + "."
+
+    callgraph = defaultdict(set)
     rev_callgraph = defaultdict(set)
-    try:
-        for line in trace:
-            caller, callee = line
-            if (caller.startswith(upstream) and callee.startswith(upstream)) or \
-                    (caller.startswith(downstream) and any([callee.startswith(x) for x in (downstream, upstream)])):
-                rev_callgraph[callee].add(caller)
-    except:
-        print(line)
+    for line in trace:
+        caller, callee = line
+        if (caller.startswith(upstream) and callee.startswith(upstream)) or \
+                (caller.startswith(downstream) and any([callee.startswith(x) for x in (downstream, upstream)])):
+            rev_callgraph[callee].add(caller)
+            callgraph[caller].add(callee)
     for k in rev_callgraph:
         rev_callgraph[k] = list(rev_callgraph[k])
-    archive_one_cg(repo, rev_callgraph)
+    for k in callgraph:
+        callgraph[k] = list(callgraph[k])
+    with open(os.path.join("callgraph", "%s_callgraph.json" % (repo, )), mode="w", encoding="utf-8") as wf:
+        json.dump(callgraph, wf, default=lambda o: o.__dict__, indent=4)
 
 
 def main():
+    # for repo in REPOS:
+    #     dump_one_repo(repo)
+    
+    # merge downstream callgraph with upstream
     for repo in REPOS:
-        dump_one_cg(repo)
+        downs = repo
+        ups = UPSTREAM_DICT[repo]
+        callgraph = defaultdict(set)
+
+        with open(os.path.join("callgraph", "%s_callgraph.json" % (downs, )), mode="r", encoding="utf-8") as rf:
+            j = json.load(rf)
+        for k in j:
+            for vi in j[k]:
+                callgraph[k].add(vi)
+
+        with open(os.path.join("callgraph", "%s_callgraph.json" % (ups, )), mode="r", encoding="utf-8") as rf:
+            j = json.load(rf)
+        for k in j:
+            for vi in j[k]:
+                callgraph[k].add(vi)
+
+        for k in callgraph:
+            callgraph[k] = list(callgraph[k])
+        with open(os.path.join("merged_callgraph", "%s_callgraph.json" % (repo, )), mode="w", encoding="utf-8") as wf:
+            json.dump(callgraph, wf, default=lambda o: o.__dict__, indent=4)
+        
+        rev_callgraph = defaultdict(set)
+        for k in callgraph:
+            for vi in callgraph[k]:
+                rev_callgraph[vi].add(k)
+        for k in rev_callgraph:
+            rev_callgraph[k] = list(rev_callgraph[k])
+        with open(os.path.join("merged_callgraph", "%s_rev_callgraph.json" % (repo, )), mode="w", encoding="utf-8") as wf:
+            json.dump(rev_callgraph, wf, default=lambda o: o.__dict__, indent=4)
 
 
 if __name__ == "__main__":

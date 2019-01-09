@@ -52,9 +52,11 @@ def approach1():
                 spl_file.append(ssi)
             file = '.'.join(spl_file)
             selected_tests_module.add(file)
-            min_depth_dict[file] = min(min_depth_dict.setdefault(file, 99999), depth_dict[si])
+            min_depth_dict[file] = min(
+                min_depth_dict.setdefault(file, 99999), depth_dict[si])
 
-    selected_tests_module = list(sorted(selected_tests_module, key=lambda x: min_depth_dict[x]))
+    selected_tests_module = list(
+        sorted(selected_tests_module, key=lambda x: min_depth_dict[x]))
 
     priority = np.array([min_depth_dict[x] for x in selected_tests_module])
     priority = np.exp(-priority)
@@ -66,7 +68,8 @@ def approach1():
         if i:
             if priority[i] != priority[i - 1]:
                 rank = i + 1
-        print("#%d" % (rank,), selected_tests_module[i], "%.5f" % (priority[i],))
+        print("#%d" %
+              (rank,), selected_tests_module[i], "%.5f" % (priority[i],))
 
 
 def get_test_cases():
@@ -164,7 +167,8 @@ def approach2():
 
     coverage_dict = approach2_helper()
 
-    selected_tests_module = list(sorted(selected_tests_module, key=lambda x: -coverage_dict[x]))
+    selected_tests_module = list(
+        sorted(selected_tests_module, key=lambda x: -coverage_dict[x]))
 
     priority = np.array([coverage_dict[x] for x in selected_tests_module])
     priority = priority / np.sum(priority)

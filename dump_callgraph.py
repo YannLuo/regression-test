@@ -18,12 +18,12 @@ UPSTREAM_DICT = {
 def read_call_trace(cg_file):
     with open(cg_file, mode="r", encoding="utf-8") as rf:
         lines = rf.readlines()
-    trace = [line.strip().split() for line in lines]
+    trace = [line.strip().split('$') for line in lines]
     return trace
 
 
 def archive_one_cg(repo, rev_callgraph):
-    with open(os.path.join("callgraph", "%s_rev_callgraph.json" % (repo, )), mode="w", encoding="utf-8") as wf:
+    with open(os.path.join("trace", "%s_rev_callgraph.json" % (repo, )), mode="w", encoding="utf-8") as wf:
         wf.write(
             json.dumps(rev_callgraph,
                        default=lambda o: o.__dict__,
@@ -33,17 +33,18 @@ def archive_one_cg(repo, rev_callgraph):
 
 def dump_one_cg(repo):
     trace = read_call_trace(os.path.join(
-        "callgraph", "%s_trace.txt" % (repo, )))
+        "trace", "%s_trace.txt" % (repo, )))
     downstream = repo + "."
     upstream = UPSTREAM_DICT[repo] + "."
     rev_callgraph = defaultdict(set)
     try:
-        for caller, callee in trace:
+        for line in trace:
+            caller, callee = line
             if (caller.startswith(upstream) and callee.startswith(upstream)) or \
                     (caller.startswith(downstream) and any([callee.startswith(x) for x in (downstream, upstream)])):
                 rev_callgraph[callee].add(caller)
     except:
-        print(repo)
+        print(line)
     for k in rev_callgraph:
         rev_callgraph[k] = list(rev_callgraph[k])
     archive_one_cg(repo, rev_callgraph)

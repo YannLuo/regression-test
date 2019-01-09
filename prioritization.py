@@ -8,10 +8,6 @@ with open("callgraph.json", mode='r', encoding='utf-8') as rf:
 with open('rev_callgraph.json', mode='r', encoding='utf-8') as rf:
     rev_callgraph = json.load(rf)
 
-with open('numpy_APIs.txt', mode='r', encoding='utf-8') as rf:
-    numpy_APIs = rf.readlines()
-    numpy_APIs = set([api.strip() for api in numpy_APIs])
-
 mod_functiondef_list = get_modified_functions()
 
 
@@ -97,12 +93,28 @@ def approach2_helper():
                     if si not in s:
                         q.append(si)
                         s.add(si)
-        return s & numpy_APIs
+        return s
 
     test_cases = get_test_cases()
     tmp_dict = {}
     for test_case in test_cases:
-        tmp_dict[test_case] = _helper(test_case)
+        result = _helper(test_case)
+        result = set([r for r in result if r.startswith('numpy.')])
+        tmp_dict[test_case] = result
+
+    # ret_dict = {}
+    # for k, v in tmp_dict.items():
+    #     spl_file = []
+    #     spl_si = k.split('.')[:-1]
+    #     for ssi in spl_si:
+    #         if ssi[0].isupper():
+    #             break
+    #         spl_file.append(ssi)
+    #     file = '.'.join(spl_file)
+    #     ret_dict[file] = ret_dict.setdefault(file, set()) | v
+
+    # for k, v in ret_dict.items():
+    #     ret_dict[k] = len(v)
 
     ret_dict = {}
     for k, v in tmp_dict.items():
@@ -113,10 +125,8 @@ def approach2_helper():
                 break
             spl_file.append(ssi)
         file = '.'.join(spl_file)
-        ret_dict[file] = ret_dict.setdefault(file, set()) | v
+        ret_dict[file] = max(ret_dict.setdefault(file, 0), len(v))
 
-    for k, v in ret_dict.items():
-        ret_dict[k] = len(v)
     return ret_dict
 
 
@@ -157,7 +167,6 @@ def approach2():
     selected_tests_module = list(sorted(selected_tests_module, key=lambda x: -coverage_dict[x]))
 
     priority = np.array([coverage_dict[x] for x in selected_tests_module])
-    priority = np.exp(priority)
     priority = priority / np.sum(priority)
 
     rank = 1

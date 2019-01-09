@@ -8,7 +8,7 @@ import json
 def get_modified_functions():
     repo_path = os.path.join('REPOS', 'numpy')
     repo = git.Repo(repo_path)
-    commit_sha = "7caac2e"
+    commit_sha = "3cd9e73"
     pre_commit_sha = f"{commit_sha}~1"
     diff_content = repo.git.diff(pre_commit_sha, commit_sha)
     diff_infos = parse_diff(diff_content)

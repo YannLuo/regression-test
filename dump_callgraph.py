@@ -3,15 +3,12 @@ import json
 from collections import defaultdict
 
 
-REPOS = ["numpy", "astropy", "theano", "numba", "obspy", "asdf", "ccdproc"]
+REPOS = ["astropy", "ccdproc", "dask", "gammapy", "h5py", "IPython", "joblib", "matplotlib", "nbconvert",
+"networkx", "nilearn", "numba", "numexpr", "numpy", "obspy", "pandas", "scipy", "seaborn", "skbio", "sklearn",
+"specutils", "statsmodels", "sympy", "tables", "theano", "xarray"][:1]
 UPSTREAM_DICT = {
-    "numpy": "numpy",
-    "astropy": "numpy",
-    "theano": "numpy",
-    "numba": "numpy",
-    "obspy": "numpy",
-    "asdf": "astropy",
-    "ccdproc": "astropy"
+    "scipy": "numpy",
+    "astropy": "scipy"
 }
 
 
@@ -24,16 +21,21 @@ def read_call_trace(cg_file):
 
 def dump_one_repo(repo):
     trace = read_call_trace(os.path.join(
-        "trace", "%s_trace.txt" % (repo, )))
-    downstream = repo + "."
-    upstream = UPSTREAM_DICT[repo] + "."
+        "traces", "%s_trace.txt" % (repo, )))
+    downstream = repo
+    upstream = UPSTREAM_DICT[repo]
 
     callgraph = defaultdict(set)
     rev_callgraph = defaultdict(set)
     for line in trace:
         caller, callee = line
         if (caller.startswith(upstream) and callee.startswith(upstream)) or \
-                (caller.startswith(downstream) and any([callee.startswith(x) for x in (downstream, upstream)])):
+                (caller.startswith(downstream) and any([callee.startswith(x) for x in (downstream, upstream)])) or \
+                (upstream == "scipy" and (
+                    caller.startswith(UPSTREAM_DICT[upstream]) and callee.startswith(UPSTREAM_DICT[upstream]) or
+                    caller.startswith(upstream) and callee.startswith(UPSTREAM_DICT[upstream]) or 
+                    caller.startswith(downstream) and callee.startswith(UPSTREAM_DICT[upstream])
+                )):
             rev_callgraph[callee].add(caller)
             callgraph[caller].add(callee)
     for k in rev_callgraph:
@@ -45,9 +47,10 @@ def dump_one_repo(repo):
 
 
 def main():
-    # for repo in REPOS:
-    #     dump_one_repo(repo)
     
+    for repo in REPOS:
+        dump_one_repo(repo)
+
     # merge downstream callgraph with upstream
     for repo in REPOS:
         downs = repo
@@ -60,11 +63,19 @@ def main():
             for vi in j[k]:
                 callgraph[k].add(vi)
 
-        with open(os.path.join("callgraph", "%s_callgraph.json" % (ups, )), mode="r", encoding="utf-8") as rf:
-            j = json.load(rf)
-        for k in j:
-            for vi in j[k]:
-                callgraph[k].add(vi)
+
+        if ups != "$":
+            with open(os.path.join("callgraph", "%s_callgraph.json" % (ups, )), mode="r", encoding="utf-8") as rf:
+                j = json.load(rf)
+            for k in j:
+                for vi in j[k]:
+                    callgraph[k].add(vi)
+        if ups == "scipy":
+            with open(os.path.join("callgraph", "%s_callgraph.json" % (UPSTREAM_DICT[ups], )), mode="r", encoding="utf-8") as rf:
+                j = json.load(rf)
+            for k in j:
+                for vi in j[k]:
+                    callgraph[k].add(vi)
 
         for k in callgraph:
             callgraph[k] = list(callgraph[k])

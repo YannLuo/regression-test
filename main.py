@@ -8,7 +8,7 @@ import json
 def get_modified_functions():
     repo_path = os.path.join('REPOS', 'numpy')
     repo = git.Repo(repo_path)
-    commit_sha = "3cd9e73"
+    commit_sha = "a859ace"
     pre_commit_sha = f"{commit_sha}~1"
     diff_content = repo.git.diff(pre_commit_sha, commit_sha)
     diff_infos = parse_diff(diff_content)
@@ -108,7 +108,7 @@ def main():
 
     # test_files = set()
     # for caller, callees in callgraph.items():
-    #     if ".tests." in caller and caller.startswith('astropy'):
+    #     if ".tests." in caller and caller.startswith('astropy') and "test_" in caller:
     #         spl_file = []
     #         spl_cs = caller.split('.')[:-1]
     #         for ssi in spl_cs:
@@ -118,7 +118,7 @@ def main():
     #         file = '.'.join(spl_file)
     #         test_files.add(file)
     #     for callee in callees:
-    #         if ".tests." in callee and callee.startswith('astropy'):
+    #         if ".tests." in callee and callee.startswith('astropy') and "test_" in callee:
     #             spl_file = []
     #             spl_cs = callee.split('.')[:-1]
     #             for ssi in spl_cs:
@@ -127,15 +127,6 @@ def main():
     #                 spl_file.append(ssi)
     #             file = '.'.join(spl_file)
     #             test_files.add(file)
-    # print(len(test_files))
-
-    # test_files = set()
-    # for caller, callees in callgraph.items():
-    #     if ".tests." in caller and caller.startswith('astropy') and caller.split('.')[-1].startswith("test_"):
-    #         test_files.add(caller)
-    #     for callee in callees:
-    #         if ".tests." in callee and callee.startswith('astropy') and callee.split('.')[-1].startswith("test_"):
-    #             test_files.add(callee)
     # print(len(test_files))
 
     # analyze reversed callgraph
@@ -180,7 +171,7 @@ def main():
 
     selected_tests_module = set()
     for si in s:
-        if ".tests." in si and si.startswith('astropy.'):
+        if ".tests." in si and si.startswith('astropy.') and "test_" in si:
             spl_file = []
             spl_si = si.split('.')[:-1]
             for ssi in spl_si:

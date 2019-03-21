@@ -1,11 +1,13 @@
 import json
 from main import get_modified_functions
 import numpy as np
+import csv
+import os
 
-with open("callgraph.json", mode='r', encoding='utf-8') as rf:
+with open(os.path.join("merged_callgraph", "astropy_callgraph.json"), mode='r', encoding='utf-8') as rf:
     callgraph = json.load(rf)
 
-with open('rev_callgraph.json', mode='r', encoding='utf-8') as rf:
+with open(os.path.join("merged_callgraph", "astropy_rev_callgraph.json"), mode='r', encoding='utf-8') as rf:
     rev_callgraph = json.load(rf)
 
 mod_functiondef_list = get_modified_functions()
@@ -64,12 +66,13 @@ def approach1():
     priority = priority / np.sum(priority)
 
     rank = 1
-    for i in range(len(selected_tests_module)):
-        if i:
-            if priority[i] != priority[i - 1]:
-                rank = i + 1
-        print("#%d" %
-              (rank,), selected_tests_module[i], "%.5f" % (priority[i],))
+    with open('priority.csv', mode='w', encoding='utf-8', newline='') as wf:
+        writer = csv.writer(wf)
+        for i in range(len(selected_tests_module)):
+            if i:
+                if priority[i] != priority[i - 1]:
+                    rank = i + 1
+            writer.writerow(["#%d" % (rank,), selected_tests_module[i], "%.5f" % (priority[i],)])
 
 
 def get_test_cases():
@@ -182,7 +185,7 @@ def approach2():
 
 
 def main():
-    approach2()
+    approach1()
 
 
 if __name__ == '__main__':

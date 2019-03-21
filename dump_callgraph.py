@@ -4,8 +4,8 @@ from collections import defaultdict
 
 
 REPOS = ["astropy", "ccdproc", "dask", "gammapy", "h5py", "IPython", "joblib", "matplotlib", "nbconvert",
-"networkx", "nilearn", "numba", "numexpr", "numpy", "obspy", "pandas", "scipy", "seaborn", "skbio", "sklearn",
-"specutils", "statsmodels", "sympy", "tables", "theano", "xarray", "photutils"][-1:]
+         "networkx", "nilearn", "numba", "numexpr", "numpy", "obspy", "pandas", "scipy", "seaborn", "skbio", "sklearn",
+         "specutils", "statsmodels", "sympy", "tables", "theano", "xarray", "photutils", "asdf"][-1:]
 UPSTREAM_DICT = {
     "astropy": "scipy",
     "ccdproc": "scipy",
@@ -33,7 +33,8 @@ UPSTREAM_DICT = {
     "tables": "numpy",
     "theano": "scipy",
     "xarray": "scipy",
-    "photutils": "scipy"
+    "photutils": "scipy",
+    "asdf": "numpy"
 }
 
 
@@ -58,8 +59,9 @@ def dump_one_repo(repo):
                 (caller.startswith(downstream) and any([callee.startswith(x) for x in (downstream, upstream)])) or \
                 (upstream == "scipy" and (
                     caller.startswith(UPSTREAM_DICT[upstream]) and callee.startswith(UPSTREAM_DICT[upstream]) or
-                    caller.startswith(upstream) and callee.startswith(UPSTREAM_DICT[upstream]) or 
-                    caller.startswith(downstream) and callee.startswith(UPSTREAM_DICT[upstream])
+                    caller.startswith(upstream) and callee.startswith(UPSTREAM_DICT[upstream]) or
+                    caller.startswith(downstream) and callee.startswith(
+                        UPSTREAM_DICT[upstream])
                 )):
             rev_callgraph[callee].add(caller)
             callgraph[caller].add(callee)
@@ -72,7 +74,7 @@ def dump_one_repo(repo):
 
 
 def main():
-    
+
     for repo in REPOS:
         dump_one_repo(repo)
 
@@ -87,7 +89,6 @@ def main():
         for k in j:
             for vi in j[k]:
                 callgraph[k].add(vi)
-
 
         if ups != "$":
             with open(os.path.join("callgraph", "%s_callgraph.json" % (ups, )), mode="r", encoding="utf-8") as rf:
@@ -106,7 +107,7 @@ def main():
             callgraph[k] = list(callgraph[k])
         with open(os.path.join("merged_callgraph", "%s_callgraph.json" % (repo, )), mode="w", encoding="utf-8") as wf:
             json.dump(callgraph, wf, default=lambda o: o.__dict__, indent=4)
-        
+
         rev_callgraph = defaultdict(set)
         for k in callgraph:
             for vi in callgraph[k]:
@@ -114,7 +115,8 @@ def main():
         for k in rev_callgraph:
             rev_callgraph[k] = list(rev_callgraph[k])
         with open(os.path.join("merged_callgraph", "%s_rev_callgraph.json" % (repo, )), mode="w", encoding="utf-8") as wf:
-            json.dump(rev_callgraph, wf, default=lambda o: o.__dict__, indent=4)
+            json.dump(rev_callgraph, wf,
+                      default=lambda o: o.__dict__, indent=4)
 
 
 if __name__ == "__main__":

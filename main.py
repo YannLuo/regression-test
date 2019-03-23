@@ -104,31 +104,6 @@ def main():
     #                    indent=4)
     #     )
 
-    # identify test files
-
-    # test_files = set()
-    # for caller, callees in callgraph.items():
-    #     if ".tests." in caller and caller.startswith('astropy') and "test_" in caller:
-    #         spl_file = []
-    #         spl_cs = caller.split('.')[:-1]
-    #         for ssi in spl_cs:
-    #             if ssi[0].isupper():
-    #                 break
-    #             spl_file.append(ssi)
-    #         file = '.'.join(spl_file)
-    #         test_files.add(file)
-    #     for callee in callees:
-    #         if ".tests." in callee and callee.startswith('astropy') and "test_" in callee:
-    #             spl_file = []
-    #             spl_cs = callee.split('.')[:-1]
-    #             for ssi in spl_cs:
-    #                 if ssi[0].isupper():
-    #                     break
-    #                 spl_file.append(ssi)
-    #             file = '.'.join(spl_file)
-    #             test_files.add(file)
-    # print(len(test_files))
-
     # analyze reversed callgraph
 
     # rev_callgraph = defaultdict(set)
@@ -151,6 +126,30 @@ def main():
     with open(os.path.join("merged_callgraph", "astropy_rev_callgraph.json"), mode='r', encoding='utf-8') as rf:
         rev_callgraph = json.load(rf)
 
+    # identify test files
+    # test_files = set()
+    # for caller, callees in rev_callgraph.items():
+    #     if ".tests." in caller and caller.startswith('astropy') and "test_" in caller:
+    #         spl_file = []
+    #         spl_cs = caller.split('.')[:-1]
+    #         for ssi in spl_cs:
+    #             if ssi[0].isupper():
+    #                 break
+    #             spl_file.append(ssi)
+    #         file = '.'.join(spl_file)
+    #         test_files.add(file)
+    #     for callee in callees:
+    #         if ".tests." in callee and callee.startswith('astropy') and "test_" in callee:
+    #             spl_file = []
+    #             spl_cs = callee.split('.')[:-1]
+    #             for ssi in spl_cs:
+    #                 if ssi[0].isupper():
+    #                     break
+    #                 spl_file.append(ssi)
+    #             file = '.'.join(spl_file)
+    #             test_files.add(file)
+    # print(len(test_files))
+
     s = set()
     q = []
     for prefix_namespace, name in mod_functiondef_list:
@@ -165,9 +164,10 @@ def main():
         q = q[1:]
         if top in rev_callgraph:
             for si in rev_callgraph[top]:
-                if si not in s:
+                if si not in s and all(ch not in si for ch in ("(", "#", "<", "__init__")):
                     q.append(si)
                     s.add(si)
+
 
     selected_tests_module = set()
     for si in s:
@@ -183,6 +183,12 @@ def main():
 
     for item in selected_tests_module:
         print(item)
+
+    # st = "astropy.coordinates.tests.test_earth.TestInput.test_ellipsoid"
+    # print(st)
+    # while st in pre:
+    #     print(pre[st])
+    #     st = pre[st]
 
 
 if __name__ == '__main__':

@@ -5,7 +5,8 @@ from collections import defaultdict
 
 REPOS = ["astropy", "ccdproc", "dask", "gammapy", "h5py", "IPython", "joblib", "matplotlib", "nbconvert",
          "networkx", "nilearn", "numba", "numexpr", "numpy", "obspy", "pandas", "scipy", "seaborn", "skbio", "sklearn",
-         "specutils", "statsmodels", "sympy", "tables", "theano", "xarray", "photutils", "asdf"][-1:]
+         "specutils", "statsmodels", "sympy", "tables", "theano", "xarray", "photutils", "asdf", "poppy", "astropy_helpers",
+         "bottleneck", "pyregion", "brian2", "naima", "pyamg", "patsy", "astroplan"][-1:]
 UPSTREAM_DICT = {
     "astropy": "scipy",
     "ccdproc": "scipy",
@@ -34,7 +35,16 @@ UPSTREAM_DICT = {
     "theano": "scipy",
     "xarray": "scipy",
     "photutils": "scipy",
-    "asdf": "numpy"
+    "asdf": "numpy",
+    "poppy": "scipy",
+    "astropy_helpers": "numpy",
+    "bottleneck": "numpy",
+    "pyregion": "numpy",
+    "brian2": "numpy",
+    "naima": "scipy",
+    "pyamg": "scipy",
+    "patsy": "numpy",
+    "astroplan": "numpy"
 }
 
 

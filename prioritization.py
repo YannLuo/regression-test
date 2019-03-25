@@ -10,7 +10,7 @@ with open(os.path.join("merged_callgraph", "astropy_callgraph.json"), mode='r', 
 with open(os.path.join("merged_callgraph", "astropy_rev_callgraph.json"), mode='r', encoding='utf-8') as rf:
     rev_callgraph = json.load(rf)
 
-mod_functiondef_list = get_modified_functions()
+mod_functiondef_list = get_modified_functions("c8bc149")
 
 
 def approach1():
@@ -38,14 +38,14 @@ def approach1():
         depth_dict[top] = cnt
         if top in rev_callgraph:
             for si in rev_callgraph[top]:
-                if si not in s:
+                if si not in s and all(ch not in si for ch in ("(", "#", "<", "__init__")):
                     q.append(si)
                     s.add(si)
 
     min_depth_dict = {}
     selected_tests_module = set()
     for si in s:
-        if ".tests." in si and si.startswith('astropy'):
+        if ".tests." in si and si.startswith('astropy.') and "test_" in si:
             spl_file = []
             spl_si = si.split('.')[:-1]
             for ssi in spl_si:

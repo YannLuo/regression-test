@@ -5,10 +5,9 @@ import os
 import json
 
 
-def get_modified_functions():
+def get_modified_functions(commit_sha):
     repo_path = os.path.join('REPOS', 'numpy')
     repo = git.Repo(repo_path)
-    commit_sha = "a859ace"
     pre_commit_sha = f"{commit_sha}~1"
     diff_content = repo.git.diff(pre_commit_sha, commit_sha)
     diff_infos = parse_diff(diff_content)
@@ -57,76 +56,21 @@ def get_modified_functions():
     return mod_functiondef_list
 
 
+upstream = "numpy"
+downstream = "astropy"
+
+
 def main():
     # ========== analyze git diff and dump modified function/method ==========
 
-    mod_functiondef_list = get_modified_functions()
-
-    # ========== calculate reverse callgraph ==========
-
-    # with open("callgraph.json", mode='r', encoding='utf-8') as rf:
-    #     callgraph = json.load(rf)
-
-    # identify numpy APIs
-
-    # callgraph = defaultdict(set)
-    # numpy_APIs = set()
-    # with open("astropy_callgraph.txt", mode="r", encoding="utf-8") as rf:
-    #     lines = rf.readlines()
-    # for line in lines:
-    #     src, dst = line.strip().split()
-    #     if (src.startswith("numpy") and dst.startswith("numpy")) or \
-    #             (src.startswith("astropy") and any([dst.startswith(x) for x in ("numpy", "astropy")])):
-    #         callgraph[src].add(dst)
-    #         if src.startswith("astropy") and dst.startswith("numpy"):
-    #             numpy_APIs.add(dst)
-
-    # with open('numpy_APIs.txt', mode='w', encoding='utf-8') as wf:
-    #     for api in numpy_APIs:
-    #         wf.write("%s\n" % (api, ))
-
-    # analyze callgraph
-
-    # with open("numpy_callgraph.txt", mode="r", encoding="utf-8") as rf:
-    #     lines = rf.readlines()
-    # for line in lines:
-    #     src, dst = line.strip().split()
-    #     if src.startswith("numpy") and dst.startswith("numpy"):
-    #         callgraph[src].add(dst)
-    #
-    # for k in callgraph:
-    #     callgraph[k] = list(callgraph[k])
-
-    # with open('callgraph.json', mode='w', encoding='utf-8') as wf:
-    #     wf.write(
-    #         json.dumps(callgraph,
-    #                    default=lambda o: o.__dict__,
-    #                    indent=4)
-    #     )
-
-    # analyze reversed callgraph
-
-    # rev_callgraph = defaultdict(set)
-    # for caller, callee_list in callgraph.items():
-    #     for callee in callee_list:
-    #         rev_callgraph[callee].add(caller)
-    #
-    # for k in rev_callgraph:
-    #     rev_callgraph[k] = list(rev_callgraph[k])
-    #
-    # with open('rev_callgraph.json', mode='w', encoding='utf-8') as wf:
-    #     wf.write(
-    #         json.dumps(rev_callgraph,
-    #                    default=lambda o: o.__dict__,
-    #                    indent=4)
-    #     )
+    mod_functiondef_list = get_modified_functions("a859ace")
 
     # ========== analyze change impact (Regression Testing Selection) ==========
 
-    with open(os.path.join("merged_callgraph", "astropy_rev_callgraph.json"), mode='r', encoding='utf-8') as rf:
+    with open(os.path.join("merged_callgraph", "%s_rev_callgraph.json" % (downstream, )), mode='r', encoding='utf-8') as rf:
         rev_callgraph = json.load(rf)
 
-    # identify test files
+    # 统计测试文件数
     # test_files = set()
     # for caller, callees in rev_callgraph.items():
     #     if ".tests." in caller and caller.startswith('astropy') and "test_" in caller:
@@ -168,10 +112,9 @@ def main():
                     q.append(si)
                     s.add(si)
 
-
     selected_tests_module = set()
     for si in s:
-        if ".tests." in si and si.startswith('astropy.') and "test_" in si:
+        if ".tests." in si and si.startswith(downstream + ".") and "test_" in si:
             spl_file = []
             spl_si = si.split('.')[:-1]
             for ssi in spl_si:
@@ -183,12 +126,6 @@ def main():
 
     for item in selected_tests_module:
         print(item)
-
-    # st = "astropy.coordinates.tests.test_earth.TestInput.test_ellipsoid"
-    # print(st)
-    # while st in pre:
-    #     print(pre[st])
-    #     st = pre[st]
 
 
 if __name__ == '__main__':

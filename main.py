@@ -5,6 +5,7 @@ import os
 from select import select
 import json
 
+
 def get_modified_functions(commit_sha):
     repo_path = os.path.join('REPOS', 'numpy')
     repo = git.Repo(repo_path)
@@ -94,10 +95,7 @@ def main():
     # print(len(test_files))
 
     selected_tests_module, traces = select(downstream, mod_functiondef_list)
-    print(len(selected_tests_module), len(traces))
-    for mod in selected_tests_module:
-        print(mod)
-        break
+
 
 
 if __name__ == '__main__':

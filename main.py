@@ -3,6 +3,8 @@ from analyzer.ast_operator import collect_functiondef
 import git
 import os
 import json
+import copy
+from collections import deque
 
 
 def get_modified_functions(commit_sha):
@@ -95,26 +97,19 @@ def main():
     # print(len(test_files))
 
     s = set()
-    q = []
+    q = deque()
     for prefix_namespace, name in mod_functiondef_list:
         for cur_call in rev_callgraph:
             if cur_call.startswith(prefix_namespace) and cur_call.split('.')[-1] == name and cur_call not in s:
                 if cur_call not in s:
-                    q.append(cur_call)
+                    q.append((cur_call, [cur_call]))
                     s.add(cur_call)
 
-    while len(q):
-        top = q[0]
-        q = q[1:]
-        if top in rev_callgraph:
-            for si in rev_callgraph[top]:
-                if si not in s and all(ch not in si for ch in ("(", "#", "<", "__init__")):
-                    q.append(si)
-                    s.add(si)
-
     selected_tests_module = set()
-    for si in s:
-        if ".tests." in si and si.startswith(downstream + ".") and "test_" in si:
+    traces = {}
+    while len(q):
+        top, trace = q.popleft()
+        if ".tests." in top and top.startswith(downstream + ".") and "test_" in top:
             spl_file = []
             spl_si = si.split('.')[:-1]
             for ssi in spl_si:
@@ -123,9 +118,12 @@ def main():
                 spl_file.append(ssi)
             file = '.'.join(spl_file)
             selected_tests_module.add(file)
-
-    for item in selected_tests_module:
-        print(item)
+            traces[si] = trace
+        if top in rev_callgraph:
+            for si in rev_callgraph[top]:
+                if si not in s and all(ch not in si for ch in ("(", "#", "<", "__init__")):
+                    q.append((si, trace + [si]))
+                    s.add(si)
 
 
 if __name__ == '__main__':

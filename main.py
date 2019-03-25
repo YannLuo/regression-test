@@ -2,10 +2,8 @@ from analyzer.diff_parser import parse_diff
 from analyzer.ast_operator import collect_functiondef
 import git
 import os
+from select import select
 import json
-import copy
-from collections import deque
-
 
 def get_modified_functions(commit_sha):
     repo_path = os.path.join('REPOS', 'numpy')
@@ -69,10 +67,9 @@ def main():
 
     # ========== analyze change impact (Regression Testing Selection) ==========
 
-    with open(os.path.join("merged_callgraph", "%s_rev_callgraph.json" % (downstream, )), mode='r', encoding='utf-8') as rf:
-        rev_callgraph = json.load(rf)
-
     # 统计测试文件数
+    # with open(os.path.join("merged_callgraph", "%s_rev_callgraph.json" % (downstream, )), mode='r', encoding='utf-8') as rf:
+    #     rev_callgraph = json.load(rf)
     # test_files = set()
     # for caller, callees in rev_callgraph.items():
     #     if ".tests." in caller and caller.startswith('astropy') and "test_" in caller:
@@ -96,34 +93,11 @@ def main():
     #             test_files.add(file)
     # print(len(test_files))
 
-    s = set()
-    q = deque()
-    for prefix_namespace, name in mod_functiondef_list:
-        for cur_call in rev_callgraph:
-            if cur_call.startswith(prefix_namespace) and cur_call.split('.')[-1] == name and cur_call not in s:
-                if cur_call not in s:
-                    q.append((cur_call, [cur_call]))
-                    s.add(cur_call)
-
-    selected_tests_module = set()
-    traces = {}
-    while len(q):
-        top, trace = q.popleft()
-        if ".tests." in top and top.startswith(downstream + ".") and "test_" in top:
-            spl_file = []
-            spl_si = si.split('.')[:-1]
-            for ssi in spl_si:
-                if ssi[0].isupper():
-                    break
-                spl_file.append(ssi)
-            file = '.'.join(spl_file)
-            selected_tests_module.add(file)
-            traces[si] = trace
-        if top in rev_callgraph:
-            for si in rev_callgraph[top]:
-                if si not in s and all(ch not in si for ch in ("(", "#", "<", "__init__")):
-                    q.append((si, trace + [si]))
-                    s.add(si)
+    selected_tests_module, traces = select(downstream, mod_functiondef_list)
+    print(len(selected_tests_module), len(traces))
+    for mod in selected_tests_module:
+        print(mod)
+        break
 
 
 if __name__ == '__main__':

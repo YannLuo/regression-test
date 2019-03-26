@@ -64,7 +64,7 @@ downstream = "astropy"
 def main():
     # ========== analyze git diff and dump modified function/method ==========
 
-    mod_functiondef_list = get_modified_functions("a859ace")
+    mod_functiondef_list = get_modified_functions("c8bc149")
 
     # ========== analyze change impact (Regression Testing Selection) ==========
 

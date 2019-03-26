@@ -46,14 +46,17 @@ def select_by_coverage(downstream, upstream_mod):
     while True:
         best_test = ""
         best_diff_len = 0
+        best_trace = []
         for test in down_tests:
-            trace = traces[test]
-            if len(set(trace[1:-1]) - coverage) > best_diff_len:
-                best_diff_len = len(set(trace[1:-1]) - coverage)
+            trace = traces[test][:-1]
+            if len(set(trace) - coverage) > best_diff_len:
+                best_diff_len = len(set(trace) - coverage)
                 best_test = test
+                best_trace = trace
         if not best_test:
             break
-        coverage = coverage | set(traces[best_test][1:-1])
+        # print(best_test, best_trace)
+        coverage = coverage | set(best_trace)
         selected_tests.add(best_test)
         down_tests.remove(best_test)
 

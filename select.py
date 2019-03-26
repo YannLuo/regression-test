@@ -35,3 +35,37 @@ def select(downstream, upstream_mod):
                     q.append((si, trace + [si]))
                     s.add(si)
     return selected_tests_module, traces
+
+
+def select_by_coverage(downstream, upstream_mod):
+    _, traces = select(downstream, upstream_mod)
+    down_tests = set(traces.keys())
+    coverage = set()
+    selected_tests = set()
+
+    while True:
+        best_test = ""
+        best_diff_len = 0
+        for test in down_tests:
+            trace = traces[test]
+            if len(set(trace[1:-1]) - coverage) > best_diff_len:
+                best_diff_len = len(set(trace[1:-1]) - coverage)
+                best_test = test
+        if not best_test:
+            break
+        coverage = coverage | set(traces[best_test][1:-1])
+        selected_tests.add(best_test)
+        down_tests.remove(best_test)
+
+    selected_tests_module = set()
+    for test in selected_tests:
+        if ".tests." in test and test.startswith(downstream + ".") and "test_" in test:
+            spl_file = []
+            spl_top = test.split('.')[:-1]
+            for ssi in spl_top:
+                if ssi[0].isupper():
+                    break
+                spl_file.append(ssi)
+            file = '.'.join(spl_file)
+            selected_tests_module.add(file)
+    return selected_tests_module, traces

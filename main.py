@@ -2,7 +2,7 @@ from analyzer.diff_parser import parse_diff
 from analyzer.ast_operator import collect_functiondef
 import git
 import os
-from select import select
+from select import select, select_by_coverage
 import json
 
 
@@ -94,8 +94,10 @@ def main():
     #             test_files.add(file)
     # print(len(test_files))
 
-    selected_tests_module, traces = select(downstream, mod_functiondef_list)
-
+    # selected_tests_module, traces = select(downstream, mod_functiondef_list)
+    selected_tests_module, traces = select_by_coverage(downstream, mod_functiondef_list)
+    for mod in selected_tests_module:
+        print(mod)
 
 
 if __name__ == '__main__':

@@ -14,7 +14,6 @@ def select(downstream, upstream_mod):
                 if cur_call not in s:
                     q.append((cur_call, [cur_call]))
                     s.add(cur_call)
-
     selected_tests_module = set()
     traces = {}
     while len(q):

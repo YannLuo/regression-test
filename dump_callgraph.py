@@ -6,12 +6,12 @@ from collections import defaultdict
 REPOS = ["astropy", "ccdproc", "dask", "gammapy", "h5py", "IPython", "joblib", "matplotlib", "nbconvert",
          "networkx", "nilearn", "numba", "numexpr", "numpy", "obspy", "pandas", "scipy", "seaborn", "skbio", "sklearn",
          "specutils", "statsmodels", "sympy", "tables", "theano", "xarray", "photutils", "asdf", "poppy", "astropy_helpers",
-         "bottleneck", "pyregion", "brian2", "naima", "pyamg", "patsy", "astroplan", "radio_beam"][-1:]
+         "bottleneck", "pyregion", "brian2", "naima", "pyamg", "patsy", "astroplan", "radio_beam"][3:4]
 UPSTREAM_DICT = {
     "astropy": "scipy",
     "ccdproc": "scipy",
     "dask": "scipy",
-    "gammapy": "scipy",
+    "gammapy": "astropy",
     "h5py": "numpy",
     "IPython": "numpy",
     "joblib": "numpy",
@@ -73,6 +73,12 @@ def dump_one_repo(repo):
                     caller.startswith(upstream) and callee.startswith(UPSTREAM_DICT[upstream]) or
                     caller.startswith(downstream) and callee.startswith(
                         UPSTREAM_DICT[upstream])
+                )) or \
+                (upstream == "astropy" and (
+                    caller.startswith(UPSTREAM_DICT[UPSTREAM_DICT[upstream]]) and callee.startswith(UPSTREAM_DICT[UPSTREAM_DICT[upstream]]) or
+                    caller.startswith(UPSTREAM_DICT[upstream]) and callee.startswith(UPSTREAM_DICT[UPSTREAM_DICT[upstream]]) or
+                    caller.startswith(upstream) and callee.startswith(UPSTREAM_DICT[UPSTREAM_DICT[upstream]]) or 
+                    caller.startswith(downstream) and callee.startswith(UPSTREAM_DICT[UPSTREAM_DICT[upstream]])
                 )):
             rev_callgraph[callee].add(caller)
             callgraph[caller].add(callee)

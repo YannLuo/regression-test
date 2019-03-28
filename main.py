@@ -2,12 +2,12 @@ from analyzer.diff_parser import parse_diff
 from analyzer.ast_operator import collect_functiondef
 import git
 import os
-from select import select, select_by_coverage
+from select_strategy import select, select_by_coverage
 import json
 
 
-def get_modified_functions(commit_sha):
-    repo_path = os.path.join('REPOS', 'numpy')
+def get_modified_functions(commit_sha, upstream):
+    repo_path = os.path.join('REPOS', upstream)
     repo = git.Repo(repo_path)
     pre_commit_sha = f"{commit_sha}~1"
     diff_content = repo.git.diff(pre_commit_sha, commit_sha)
@@ -57,23 +57,24 @@ def get_modified_functions(commit_sha):
     return mod_functiondef_list
 
 
-upstream = "numpy"
-downstream = "astropy"
+upstream = "astropy"
+downstream = "gammapy"
 
 
 def main():
     # ========== analyze git diff and dump modified function/method ==========
 
-    mod_functiondef_list = get_modified_functions("c8bc149")
+    mod_functiondef_list = get_modified_functions("5d7acd6", upstream)
 
     # ========== analyze change impact (Regression Testing Selection) ==========
 
     # 统计测试文件数
-    # with open(os.path.join("merged_callgraph", "%s_rev_callgraph.json" % (downstream, )), mode='r', encoding='utf-8') as rf:
-    #     rev_callgraph = json.load(rf)
+    with open(os.path.join("merged_callgraph", "%s_rev_callgraph.json" % (downstream, )), mode='r', encoding='utf-8') as rf:
+        rev_callgraph = json.load(rf)
+    
     # test_files = set()
     # for caller, callees in rev_callgraph.items():
-    #     if ".tests." in caller and caller.startswith('astropy') and "test_" in caller:
+    #     if ".tests." in caller and caller.startswith(downstream) and "test_" in caller:
     #         spl_file = []
     #         spl_cs = caller.split('.')[:-1]
     #         for ssi in spl_cs:
@@ -83,7 +84,7 @@ def main():
     #         file = '.'.join(spl_file)
     #         test_files.add(file)
     #     for callee in callees:
-    #         if ".tests." in callee and callee.startswith('astropy') and "test_" in callee:
+    #         if ".tests." in callee and callee.startswith(downstream) and "test_" in callee:
     #             spl_file = []
     #             spl_cs = callee.split('.')[:-1]
     #             for ssi in spl_cs:
@@ -98,6 +99,7 @@ def main():
     selected_tests_module, traces = select_by_coverage(downstream, mod_functiondef_list)
     for mod in selected_tests_module:
         print(mod)
+    print(len(selected_tests_module))
 
 
 if __name__ == '__main__':

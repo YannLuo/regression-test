@@ -34,7 +34,7 @@ def get_modified_functions(commit_sha, upstream):
             repo.git.checkout(['-f', 'master'])
         except:
             pass
-
+        
         try:
             repo.git.checkout(['-f', pre_commit_sha])
         except:
@@ -57,14 +57,14 @@ def get_modified_functions(commit_sha, upstream):
     return mod_functiondef_list
 
 
-upstream = "astropy"
-downstream = "gammapy"
+upstream = "numpy"
+downstream = "astropy"
 
 
 def main():
     # ========== analyze git diff and dump modified function/method ==========
 
-    mod_functiondef_list = get_modified_functions("5d7acd6", upstream)
+    mod_functiondef_list = get_modified_functions("124c3d8", upstream)
 
     # ========== analyze change impact (Regression Testing Selection) ==========
 
@@ -95,8 +95,8 @@ def main():
     #             test_files.add(file)
     # print(len(test_files))
 
-    # selected_tests_module, traces = select(downstream, mod_functiondef_list)
-    selected_tests_module, traces = select_by_coverage(downstream, mod_functiondef_list)
+    selected_tests_module, traces = select(downstream, mod_functiondef_list)
+    # selected_tests_module, traces = select_by_coverage(downstream, mod_functiondef_list)
     for mod in selected_tests_module:
         print(mod)
     print(len(selected_tests_module))

@@ -4,9 +4,12 @@ from collections import defaultdict
 
 
 REPOS = ["astropy", "ccdproc", "dask", "gammapy", "h5py", "IPython", "joblib", "matplotlib", "nbconvert",
-         "networkx", "nilearn", "numba", "numexpr", "numpy", "obspy", "pandas", "scipy", "seaborn", "skbio", "sklearn",
+         "networkx", "nilearn", "numexpr", "numpy", "obspy", "pandas", "scipy", "seaborn", "skbio", "sklearn",
          "specutils", "statsmodels", "sympy", "tables", "theano", "xarray", "photutils", "asdf", "poppy", "astropy_helpers",
-         "bottleneck", "pyregion", "brian2", "naima", "pyamg", "patsy", "astroplan", "radio_beam"][3:4]
+         "bottleneck", "pyregion", "brian2", "naima", "pyamg", "patsy", "astroplan", "radio_beam", "numba", 
+         "mahotas", "eliot", "randomgen", "shared_ndarray", "nrrd", "autoptim", "sparse",
+         "alphalens", "pyjet", "numbagg", "cvxpy", "aplpy", "numpydoc", "deap", "mpmath",
+         "oct2py", "atpy", "gwcs", "pymc3"][-1:]
 UPSTREAM_DICT = {
     "astropy": "scipy",
     "ccdproc": "scipy",
@@ -45,7 +48,26 @@ UPSTREAM_DICT = {
     "pyamg": "scipy",
     "patsy": "numpy",
     "astroplan": "numpy",
-    "radio_beam": "numpy"
+    "radio_beam": "numpy",
+    "randomgen": "scipy",
+    "shared_ndarray": "numpy",
+    "eliot": "numpy",
+    "mahotas": "scipy",
+    "nrrd": "numpy",
+    "autoptim": "numpy",
+    "sparse": "scipy",
+    "alphalens": "scipy",
+    "pyjet": "numpy",
+    "numbagg": "numpy",
+    "cvxpy": "scipy",
+    "aplpy": "scipy",
+    "numpydoc": "numpy",
+    "deap": "numpy",
+    "mpmath": "numpy",
+    "oct2py": "scipy",
+    "atpy": "numpy", 
+    "gwcs": "scipy",
+    "pymc3": "scipy"
 }
 
 

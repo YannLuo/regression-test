@@ -3,11 +3,39 @@ import json
 from collections import defaultdict
 
 
-REPOS = ["numpydoc"][-1:]
+REPOS = ["numpydoc", "utide", "starfish", "pyik", "npstreams", "pyxrd", "pvmismatch",
+"spampy", "pyrr", "nptdms", "hienoi", "molml", "oommftools", "nnlib", "dicom_numpy",
+"kravatte", "geometer", "slugnet", "zappy", "gfmm", "json_tricks", "pdepy", "tidynamics",
+"texpy", "numpy_buffer", "pandas_degreedays"][-1:]
 UPSTREAM_DICT = {
     "numpy": "$",
     "scipy": "numpy",
-    "numpydoc": "numpy"
+    "numpydoc": "numpy",
+    "utide": "scipy",
+    "starfish": "scipy",
+    "pyik": "numpy",
+    "npstreams": "scipy",
+    "pyxrd": "scipy",
+    "pvmismatch": "scipy",
+    "spampy": "scipy",
+    "pyrr": "numpy",
+    "nptdms": "numpy",
+    "hienoi": "numpy",
+    "molml": "scipy",
+    "oommftools": "scipy",
+    "nnlib": "numpy",
+    "dicom_numpy": "numpy",
+    "kravatte": "numpy",
+    "geometer": "numpy",
+    "slugnet": "scipy",
+    "zappy": "numpy",
+    "gfmm": "numpy",
+    "json_tricks": "numpy",
+    "pdepy": "scipy",
+    "tidynamics": "numpy",
+    "texpy": "scipy",
+    "numpy_buffer": "numpy",
+    "pandas_degreedays": "numpy"
 }
 
 
@@ -29,18 +57,18 @@ def dump_one_repo(repo):
     for line in trace:
         caller, callee = line
         if (caller.startswith(upstream) and callee.startswith(upstream)) or \
-                ((caller.startswith(downstream) or caller.startswith("tests.") or caller.startswith("test_")) and any([callee.startswith(x) for x in (downstream, upstream)])) or \
+                ((caller.startswith(downstream) or caller.startswith("tests.") or caller.startswith("test_") or caller.startswith("test.")) and any([callee.startswith(x) for x in (downstream, upstream)])) or \
                 (upstream == "scipy" and (
                     caller.startswith(UPSTREAM_DICT[upstream]) and callee.startswith(UPSTREAM_DICT[upstream]) or
                     caller.startswith(upstream) and callee.startswith(UPSTREAM_DICT[upstream]) or
-                    (caller.startswith(downstream) or caller.startswith("tests.") or caller.startswith("test_")) and callee.startswith(
+                    (caller.startswith(downstream) or caller.startswith("tests.") or caller.startswith("test_") or caller.startswith("test.")) and callee.startswith(
                         UPSTREAM_DICT[upstream])
                 )) or \
                 (upstream == "astropy" and (
                     caller.startswith(UPSTREAM_DICT[UPSTREAM_DICT[upstream]]) and callee.startswith(UPSTREAM_DICT[UPSTREAM_DICT[upstream]]) or
                     caller.startswith(UPSTREAM_DICT[upstream]) and callee.startswith(UPSTREAM_DICT[UPSTREAM_DICT[upstream]]) or
                     caller.startswith(upstream) and callee.startswith(UPSTREAM_DICT[UPSTREAM_DICT[upstream]]) or 
-                    (caller.startswith(downstream) or caller.startswith("tests.") or caller.startswith("test_")) and callee.startswith(UPSTREAM_DICT[UPSTREAM_DICT[upstream]])
+                    (caller.startswith(downstream) or caller.startswith("tests.") or caller.startswith("test_") or caller.startswith("test.")) and callee.startswith(UPSTREAM_DICT[UPSTREAM_DICT[upstream]])
                 )):
             rev_callgraph[callee].add(caller)
             callgraph[caller].add(callee)

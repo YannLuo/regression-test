@@ -3,10 +3,11 @@ import json
 from collections import defaultdict
 
 
-REPOS = ["numpydoc", "utide", "starfish", "pyik", "npstreams", "pyxrd", "pvmismatch",
+REPOS = ["numpydoc", "utide", "starfish", "pyik", "npstreams", "pyxrd", 
 "spampy", "pyrr", "nptdms", "hienoi", "molml", "oommftools", "nnlib", "dicom_numpy",
 "kravatte", "geometer", "slugnet", "zappy", "gfmm", "json_tricks", "pdepy", "tidynamics",
-"texpy", "numpy_buffer", "pandas_degreedays"][-1:]
+"texpy", "numpy_buffer", "pandas_degreedays", "pyshapes", "pvmismatch", "feets",
+"psopy", "randnla", "sdaopt", "indi", "pytablewriter"][-1:]
 UPSTREAM_DICT = {
     "numpy": "$",
     "scipy": "numpy",
@@ -35,7 +36,14 @@ UPSTREAM_DICT = {
     "tidynamics": "numpy",
     "texpy": "scipy",
     "numpy_buffer": "numpy",
-    "pandas_degreedays": "numpy"
+    "pandas_degreedays": "numpy",
+    "pyshapes": "numpy",
+    "feets": "scipy",
+    "psopy": "scipy",
+    "randnla": "numpy",
+    "sdaopt": "scipy",
+    "indi": "scipy",
+    "pytablewriter": "numpy"
 }
 
 

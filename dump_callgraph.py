@@ -10,7 +10,8 @@ REPOS = ["astropy", "ccdproc", "dask", "gammapy", "h5py", "IPython", "joblib", "
          "mahotas", "eliot", "randomgen", "shared_ndarray", "nrrd", "autoptim", "sparse",
          "alphalens", "pyjet", "numbagg", "cvxpy", "aplpy", "numpydoc", "deap", "mpmath",
          "oct2py", "atpy", "gwcs", "pymc3", "starfish", "verde", "pooch",
-         "astroimtools", "stginga", "synphot", "pydl"][-1:]
+         "astroimtools", "stginga", "synphot", "pydl",
+         "iexfinance", "plydata", "ibis"][-1:]
 UPSTREAM_DICT = {
     "astropy": "scipy",
     "ccdproc": "scipy",
@@ -74,7 +75,10 @@ UPSTREAM_DICT = {
     "astroimtools": "astropy",
     "stginga": "astropy",
     "synphot": "astropy",
-    "pydl": "astropy"
+    "pydl": "astropy",
+    "iexfinance": "numpy",
+    "plydata": "numpy",
+    "ibis": "numpy"
 }
 
 

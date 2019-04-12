@@ -7,7 +7,9 @@ REPOS = ["numpydoc", "utide", "starfish", "pyik", "npstreams", "pyxrd",
 "spampy", "pyrr", "nptdms", "hienoi", "molml", "oommftools", "nnlib", "dicom_numpy",
 "kravatte", "geometer", "slugnet", "zappy", "gfmm", "json_tricks", "pdepy", "tidynamics",
 "texpy", "numpy_buffer", "pandas_degreedays", "pyshapes", "pvmismatch", "feets",
-"psopy", "randnla", "sdaopt", "indi", "pytablewriter"][-1:]
+"psopy", "randnla", "sdaopt", "indi", "pytablewriter", "prince", "coinsta", "kodiak", "phildb", "datacompy",
+"espandas", "deepgraph", "lens", "validada", "partridge",
+"meza", "finta"][-1:]
 UPSTREAM_DICT = {
     "numpy": "$",
     "scipy": "numpy",
@@ -43,7 +45,19 @@ UPSTREAM_DICT = {
     "randnla": "numpy",
     "sdaopt": "scipy",
     "indi": "scipy",
-    "pytablewriter": "numpy"
+    "pytablewriter": "numpy",
+    "prince": "scipy",
+    "coinsta": "numpy",
+    "kodiak": "numpy",
+    "phildb": "numpy",
+    "datacompy": "numpy",
+    "espandas": "numpy",
+    "deepgraph": "numpy",
+    "lens": "numpy",
+    "validada": "numpy",
+    "partridge": "numpy",
+    "meza": "numpy",
+    "finta": "numpy"
 }
 
 

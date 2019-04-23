@@ -3,19 +3,15 @@ import json
 from collections import defaultdict
 
 
-REPOS = ["numpydoc", "utide", "starfish", "pyik", "npstreams", "pyxrd", 
-"spampy", "pyrr", "nptdms", "hienoi", "molml", "oommftools", "nnlib", "dicom_numpy",
-"kravatte", "geometer", "slugnet", "zappy", "gfmm", "json_tricks", "pdepy", "tidynamics",
-"texpy", "numpy_buffer", "pandas_degreedays", "pyshapes", "pvmismatch", "feets",
-"psopy", "randnla", "sdaopt", "indi", "pytablewriter", "prince", "coinsta", "kodiak", "phildb", "datacompy",
-"espandas", "deepgraph", "lens", "validada", "partridge",
-"meza", "finta"][-1:]
+REPOS = ["utide", "pyik", "npstreams", "pyxrd", "spampy", "pyrr", "nptdms", "hienoi", "molml", "oommftools", 
+"nnlib", "dicom_numpy", "kravatte", "geometer", "slugnet", "zappy", "gfmm", "json_tricks", "pdepy", "tidynamics",
+"texpy", "numpy_buffer", "pandas_degreedays", "pyshapes", "pvmismatch", "feets", "psopy", "randnla", "sdaopt", 
+"indi", "pytablewriter", "prince", "coinsta", "kodiak", "phildb", "datacompy", "espandas", "deepgraph", "lens", 
+"validada", "partridge", "meza", "finta"]
 UPSTREAM_DICT = {
     "numpy": "$",
     "scipy": "numpy",
-    "numpydoc": "numpy",
     "utide": "scipy",
-    "starfish": "scipy",
     "pyik": "numpy",
     "npstreams": "scipy",
     "pyxrd": "scipy",

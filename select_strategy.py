@@ -11,9 +11,8 @@ def select(downstream, upstream_mod):
     for prefix_namespace, name in upstream_mod:
         for cur_call in rev_callgraph:
             if cur_call.startswith(prefix_namespace) and cur_call.split('.')[-1] == name and cur_call not in s:
-                if cur_call not in s:
-                    q.append((cur_call, [cur_call]))
-                    s.add(cur_call)
+                q.append((cur_call, [cur_call]))
+                s.add(cur_call)
     selected_tests_module = set()
     traces = {}
     while len(q):

@@ -18,7 +18,10 @@ REPOS = ["astropy", "scipy", "numpy", "pandas", "gammapy", "ccdproc", "dask",
         "texpy", "pandas_degreedays", "pyshapes", "psopy", "randnla",
         "indi", "pytablewriter", "prince", "coinsta", "kodiak", "phildb", "espandas",
         "validada", "partridge", "meza", "finta"
-        , "pyik", "dicom_numpy", "json_tricks", "numpy_buffer", "datacompy", "deepgraph", "lens", "numpydoc"]
+        , "pyik", "dicom_numpy", "json_tricks", "numpy_buffer", "datacompy", "deepgraph", "lens", "numpydoc", "imexam", "astroscrappy", "astroML", "astroquery", "baseband",
+        "ginga", "halotools", "poliastro", "stingray", "gala", "galpy", "astropy_healpix",
+        "dust_extinction", "subsync", "tgan", "dipy", "auto_ml", "skopt", "xcessiv",
+        "scikitplot"]
 UPSTREAMS = ["numpy", "scipy", "astropy", "sklearn", "matplotlib", "pandas"]
 # UPSTREAM_DICT = {
 #     "astropy": "scipy",
@@ -120,11 +123,11 @@ def dump_one_repo(repo):
 
 def main():
 
-    # for repo in REPOS:
-    #     dump_one_repo(repo)
+    for repo in REPOS[-1:]:
+        dump_one_repo(repo)
 
     # merge downstream callgraph with upstream
-    for repo in REPOS:
+    for repo in REPOS[-1:]:
         downs = repo
         callgraph = defaultdict(set)
 

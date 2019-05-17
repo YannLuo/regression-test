@@ -3,26 +3,25 @@ import json
 from collections import defaultdict
 
 
-REPOS = ["astropy", "scipy", "numpy", "pandas", "gammapy", "ccdproc", "dask",
-        "h5py", "IPython", "joblib", "networkx", "nilearn", "numexpr", "obspy", "specutils",
-        "statsmodels", "seaborn", "sympy", "theano", "xarray", "photutils", "asdf", 
-        "pyregion", "brian2", "naima", "pyamg", "astroplan",
-        "numba", "mahotas", "eliot", "randomgen",
-        "sparse", "alphalens", "pyjet", "numbagg", "cvxpy", "aplpy", "deap", "mpmath",
-        "oct2py", "atpy", "gwcs", "pymc3", "starfish", "verde", "pooch", "astroimtools", "stginga"
-        , "pydl", "iexfinance", "plydata", "ibis"
-        , "matplotlib", "sklearn", "skbio", "tables", "astropy_helpers", "patsy"
-        , "radio_beam", "shared_ndarray", "nrrd", "autoptim", "synphot", "nptdms", "bottleneck", "poppy", "feets", "pvmismatch",
-        "utide", "npstreams", "pyxrd", "spampy", "pyrr", "hienoi", "molml", "oommftools",
-        "nnlib", "kravatte", "geometer", "slugnet", "zappy", "gfmm", "pdepy", "tidynamics",
-        "texpy", "pandas_degreedays", "pyshapes", "psopy", "randnla",
-        "indi", "pytablewriter", "prince", "coinsta", "kodiak", "phildb", "espandas",
-        "validada", "partridge", "meza", "finta"
-        , "pyik", "dicom_numpy", "json_tricks", "numpy_buffer", "datacompy", "deepgraph", "lens", "numpydoc", "imexam", "astroscrappy", "astroML", "astroquery", "baseband",
-        "ginga", "halotools", "poliastro", "stingray", "gala", "galpy", "astropy_healpix",
+REPOS = ["astropy", "scipy", "numpy", "pandas", "gammapy", "ccdproc", "dask", "h5py", 
+                    "joblib", "networkx", "nilearn", "numexpr", "obspy", "specutils", "statsmodels", "seaborn", 
+                    "sympy", "theano", "xarray", "photutils", "asdf", "pyregion", "brian2", "naima", "pyamg", 
+                    "astroplan", "numba", "mahotas", "randomgen", "sparse", "alphalens", "pyjet", 
+                    "numbagg", "cvxpy", "aplpy", "deap", "mpmath", "oct2py", "atpy", "gwcs", "pymc3", 
+                    "starfish", "verde", "astroimtools", "stginga", "pydl", "iexfinance", "plydata", 
+                    "ibis" , "matplotlib", "sklearn", "skbio", "tables", "astropy_helpers", "patsy" , "radio_beam", 
+                    "shared_ndarray", "nrrd", "synphot", "nptdms", "bottleneck", "poppy", "feets", 
+                    "pvmismatch", "utide", "npstreams", "pyxrd", "spampy", "pyrr", "hienoi", "molml", "oommftools",
+                    "nnlib", "kravatte", "geometer", "slugnet", "zappy", "gfmm", "pdepy", "tidynamics", "texpy", 
+                    "psopy", "randnla", "indi", "pytablewriter", "prince", "coinsta", 
+                    "kodiak", "phildb", "espandas", "validada", "partridge", "finta", "pyik", "dicom_numpy", 
+                    "json_tricks", "numpy_buffer", "datacompy", "deepgraph", "lens", "imexam", "astroscrappy", "astroML", "astroquery", "baseband",
+        "ginga", "halotools", "poliastro", "stingray", "gala", "astropy_healpix",
         "dust_extinction", "subsync", "tgan", "dipy", "auto_ml", "skopt", "xcessiv",
-        "scikitplot"]
-UPSTREAMS = ["numpy", "scipy", "astropy", "sklearn", "matplotlib", "pandas"]
+        "scikitplot", "onnxmltools", "seqlearn", "pystruct", "kmodes", "hdbscan",
+        "gplearn", "spherecluster", "skpro", "profanity_check", "pailab", "chainer_sklearn",
+        "sklearn_evaluation", "sklearn2", "sklearn_lvq"]
+UPSTREAMS = ["numpy", "scipy", "astropy", "sklearn", "pandas"]
 # UPSTREAM_DICT = {
 #     "astropy": "scipy",
 #     "ccdproc": "scipy",
